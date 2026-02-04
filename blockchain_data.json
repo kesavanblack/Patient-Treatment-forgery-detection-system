@@ -1,0 +1,26 @@
+[
+    {
+        "index": 0,
+        "patient_id": 6,
+        "doctor_id": 10,
+        "treatment": "cold ,fever|dolo 16",
+        "timestamp": 1768305110.2598782,
+        "time_readable": "Tue Jan 13 17:21:50 2026",
+        "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "78e4dbbd488920c94948cc462f78b6e3dd169537f7555ef29498dca280c8f9c6",
+        "is_valid": true
+    },
+    {
+        "index": 1,
+        "patient_id": "8",
+        "doctor_id": 10,
+        "treatment": "cold ,fever|paracetamol 500mg,amoxicillin",
+        "timestamp": 1768306597.1026132,
+        "time_readable": "Tue Jan 13 17:46:37 2026",
+        "date": "2026-01-13 17:46:37",
+        "previous_hash": "78e4dbbd488920c94948cc462f78b6e3dd169537f7555ef29498dca280c8f9c6",
+        "hash": "476da6eecf55275553553d424f119911e2894a03c1123db9ed0c108a28d727da",
+        "is_valid": true,
+        "block_type": "MEDICAL_RECORD"
+    }
+]

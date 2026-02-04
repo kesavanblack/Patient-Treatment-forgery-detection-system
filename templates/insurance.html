@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Insurance Claim Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Insurance Claim Verification Portal</h1>
+    <p>Verify treatment claims for insurance processing.</p>
+
+    <div class="claim-verification">
+        <h2>Verify Claim</h2>
+        <form action="/insurance_verify" method="post">
+            <label for="treatment_hash">Treatment Hash:</label>
+            <input type="text" id="treatment_hash" name="treatment_hash" required><br>
+            <label for="claim_amount">Claim Amount:</label>
+            <input type="number" id="claim_amount" name="claim_amount" step="0.01" required><br>
+            <button type="submit">Verify Claim</button>
+        </form>
+    </div>
+
+    {% if claim_result %}
+    <div id="claim-result">
+        <h2>Claim Verification Result</h2>
+        <div id="result-content">
+            <p><strong>Treatment ID:</strong> {{ claim_result.treatment.id }}</p>
+            <p><strong>Patient:</strong> {{ claim_result.patient_name }}</p>
+            <p><strong>Doctor:</strong> {{ claim_result.doctor_name }}</p>
+            <p><strong>Disease:</strong> {{ claim_result.treatment.disease }}</p>
+            <p><strong>Medicine:</strong> {{ claim_result.treatment.medicine }}</p>
+            <p><strong>Status:</strong>
+                <span style="color: {% if claim_result.status == 'Original' %}green{% elif claim_result.status == 'Suspicious' %}orange{% else %}red{% endif %}">
+                    {{ claim_result.status }}
+                </span>
+            </p>
+            <p><strong>Blockchain Valid:</strong>
+                <span style="color: {{ 'green' if claim_result.blockchain_valid else 'red' }}">
+                    {{ 'Yes' if claim_result.blockchain_valid else 'No - Tampering Detected!' }}
+                </span>
+            </p>
+            <p><strong>Claim Amount:</strong> ${{ "%.2f"|format(claim_result.claim_amount) }}</p>
+            <p><strong>Claim Status:</strong>
+                <span style="color: {{ 'green' if claim_result.approved else 'red' }}">
+                    {{ 'APPROVED' if claim_result.approved else 'REJECTED' }}
+                </span>
+            </p>
+            {% if not claim_result.approved %}
+            <p><strong>Reason:</strong> {{ claim_result.reason }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

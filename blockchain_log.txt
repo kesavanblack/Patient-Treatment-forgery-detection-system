@@ -1,0 +1,2 @@
+[2026-01-13 17:46:37] Blockchain saved with 2 blocks
+[2026-01-13 17:46:37] Block added - Index: 1, Patient: 8, Doctor: 10

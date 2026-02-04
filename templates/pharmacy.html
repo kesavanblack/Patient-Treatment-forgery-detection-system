@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pharmacy Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Pharmacy Verification Portal</h1>
+    <p>Scan QR code or enter treatment details to verify prescription authenticity.</p>
+
+    <div class="verification-section">
+        <h2>QR Code Scanner</h2>
+        <div id="qr-reader"></div>
+        <button id="start-scan">Start QR Scan</button>
+        <div id="qr-result"></div>
+    </div>
+
+    <div class="manual-verification">
+        <h2>Manual Verification</h2>
+        <form action="/pharmacy_verify" method="post">
+            <label for="treatment_hash">Treatment Hash:</label>
+            <input type="text" id="treatment_hash" name="treatment_hash" required><br>
+            <button type="submit">Verify</button>
+        </form>
+    </div>
+
+    {% if verification_result %}
+    <div id="verification-result">
+        <h2>Verification Result</h2>
+        <div id="result-content">
+            <p><strong>Treatment ID:</strong> {{ verification_result.treatment.id }}</p>
+            <p><strong>Patient:</strong> {{ verification_result.patient_name }}</p>
+            <p><strong>Doctor:</strong> {{ verification_result.doctor_name }}</p>
+            <p><strong>Disease:</strong> {{ verification_result.treatment.disease }}</p>
+            <p><strong>Medicine:</strong> {{ verification_result.treatment.medicine }}</p>
+            <p><strong>Status:</strong>
+                <span style="color: {% if verification_result.status == 'Original' %}green{% elif verification_result.status == 'Suspicious' %}orange{% else %}red{% endif %}">
+                    {{ verification_result.status }} ({{ "%.1f"|format(verification_result.treatment.confidence_score) }}%)
+                </span>
+            </p>
+            <p><strong>Blockchain Valid:</strong>
+                <span style="color: {{ 'green' if verification_result.blockchain_valid else 'red' }}">
+                    {{ 'Yes' if verification_result.blockchain_valid else 'No - Tampering Detected!' }}
+                </span>
+            </p>
+            <p><strong>Created:</strong> {{ verification_result.treatment.created_at }}</p>
+            {% if verification_result.treatment.qr_code %}
+            <p><strong>QR Code:</strong> <img src="{{ url_for('download_prescription', filename=verification_result.treatment.qr_code) }}" alt="QR Code" style="max-width: 100px;"></p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        let html5QrcodeScanner;
+
+        document.getElementById('start-scan').addEventListener('click', function() {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", { fps: 10, qrbox: 250 });
+            html5QrcodeScanner.render(onScanSuccess);
+        });
+
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById('qr-result').innerHTML = `Scanned: ${decodedText}`;
+            // Extract hash from QR data
+            const hashMatch = decodedText.match(/Hash: ([a-f0-9]+)/);
+            if (hashMatch) {
+                document.getElementById('treatment_hash').value = hashMatch[1];
+                // Auto submit or show verify button
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar h2 {
+            font-size: 20px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        
+        .navbar a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .stat-card.blue { border-left: 4px solid #2196F3; }
+        .stat-card.green { border-left: 4px solid #4CAF50; }
+        .stat-card.red { border-left: 4px solid #f44336; }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-color: #4CAF50;
+        }
+        
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border-color: #f44336;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #555;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-original {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .badge-fake {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .badge-suspicious {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+        
+        .confidence-high {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        }
+        
+        .confidence-medium {
+            background: linear-gradient(90deg, #FF9800, #FFC107);
+        }
+        
+        .confidence-low {
+            background: linear-gradient(90deg, #f44336, #E91E63);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h4 {
+            margin-bottom: 10px;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>🏥 Patient Dashboard</h2>
+        <div>
+            <span>👤 {{ session.full_name }}</span>
+            <a href="/verify_blockchain">🔗 Verify Blockchain</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <h1 style="margin-bottom: 30px; color: #333;">👤 Welcome, {{ session.full_name }}</h1>
+        
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value">{{ treatments|length }}</div>
+                <div class="stat-label">Total Treatments</div>
+            </div>
+            
+            <div class="stat-card green">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value">
+                    {% set original = treatments|selectattr('status', 'equalto', 'Original')|list|length %}
+                    {{ original }}
+                </div>
+                <div class="stat-label">Verified Prescriptions</div>
+            </div>
+            
+            <div class="stat-card red">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-value">
+                    {% set fake = treatments|selectattr('status', 'equalto', 'Fake')|list|length %}
+                    {{ fake }}
+                </div>
+                <div class="stat-label">Flagged Items</div>
+            </div>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <h4>🔒 Your Medical Records are Secured with Blockchain</h4>
+            <p>Every prescription is verified using AI and stored in an immutable blockchain. Click "Verify Blockchain" to check the integrity of all records.</p>
+        </div>
+        
+        <div class="card">
+            <h2>📋 My Treatment History</h2>
+            
+            {% if treatments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Disease</th>
+                        <th>Medicine</th>
+                        <th>AI Verification</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in treatments %}
+                    <tr>
+                        <td>
+                            <strong>{{ t.created_at[:10] }}</strong><br>
+                            <small style="color: #999;">{{ t.created_at[11:16] }}</small>
+                        </td>
+                        <td>
+                            <strong>Dr. {{ t.doctor_name }}</strong>
+                        </td>
+                        <td>{{ t.disease }}</td>
+                        <td>{{ t.medicine }}</td>
+                        <td>
+                            <span class="badge badge-{{ t.status.lower() }}">
+                                {% if t.status == 'Original' %}
+                                    ✓ Verified
+                                {% elif t.status == 'Fake' %}
+                                    ✗ Fake Detected
+                                {% else %}
+                                    ⚠ Suspicious
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ "%.1f"|format(t.confidence_score) }}%</strong>
+                            </div>
+                            <div class="confidence-bar">
+                                {% if t.confidence_score >= 70 %}
+                                <div class="confidence-fill confidence-high" style="width: {{ t.confidence_score }}%"></div>
+                                {% elif t.confidence_score >= 40 %}
+                                <div class="confidence-fill confidence-medium" style="width: {{ t.confidence_score }}%"></div>
+                                {% else %}
+                                <div class="confidence-fill confidence-low" style="width: {{ t.confidence_score }}%"></div>
+                                {% endif %}
+                            </div>
+                            <small style="color: #999;">
+                                {% if t.confidence_score >= 70 %}
+                                    High
+                                {% elif t.confidence_score >= 40 %}
+                                    Medium
+                                {% else %}
+                                    Low
+                                {% endif %}
+                            </small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="margin-bottom: 15px;">📊 Your Health Summary</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>Total Consultations:</strong> {{ treatments|length }}
+                    </div>
+                    <div>
+                        <strong>Verification Rate:</strong>
+                        {% set original = treatments|selectattr('status', 'equalto', 'Original')|list|length %}
+                        {% if treatments|length > 0 %}
+                        <span style="color: #4CAF50;">{{ "%.1f"|format((original / treatments|length) * 100) }}%</span>
+                        {% else %}
+                        0%
+                        {% endif %}
+                    </div>
+                    <div>
+                        <strong>Security Status:</strong> 
+                        <span style="color: #4CAF50;">🔒 Blockchain Protected</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>No treatments yet</h3>
+                <p>Visit a doctor to get your first prescription!</p>
+                <p style="margin-top: 15px; color: #667eea;">
+                    🔒 All prescriptions will be AI-verified and blockchain-secured
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
